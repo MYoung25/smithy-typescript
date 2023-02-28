@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.DeprecatedTrait;
 import software.amazon.smithy.model.traits.DocumentationTrait;
+import software.amazon.smithy.model.traits.InternalTrait;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -159,6 +160,9 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (shape.getTrait(DeprecatedTrait.class).isPresent()) {
                         docs = "@deprecated\n\n" + docs;
                     }
+
+                    docs = writeTsDocs(shape, docs);
+
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
@@ -188,9 +192,21 @@ public final class TypeScriptWriter extends SymbolWriter<TypeScriptWriter, Impor
                     if (member.getTrait(DeprecatedTrait.class).isPresent() || isTargetDeprecated(model, member)) {
                         docs = "@deprecated\n\n" + docs;
                     }
+
+                    docs = writeTsDocs(member, docs);
+
                     writeDocs(docs);
                     return true;
                 }).orElse(false);
+    }
+
+    private String writeTsDocs(Shape shape, String docs) {
+        if (shape.getTrait(InternalTrait.class).isPresent()) {
+            docs = "@internal\n" + docs;
+        } else {
+            docs = "@public\n" + docs;
+        }
+        return docs;
     }
 
     private boolean isTargetDeprecated(Model model, MemberShape member) {

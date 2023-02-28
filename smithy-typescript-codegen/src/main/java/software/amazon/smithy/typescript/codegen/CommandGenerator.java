@@ -170,13 +170,15 @@ final class CommandGenerator implements Runnable {
     }
 
     private void generateCommandConstructor() {
-        writer.openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
-            // The constructor can be intercepted and changed.
-            writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
-                    .pushState(COMMAND_CONSTRUCTOR_SECTION)
-                    .write("super();")
-                    .popState()
-                    .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
+        writer
+            .writeDocs(String.format("@param input - %s", inputType.getName()))
+            .openBlock("constructor(readonly input: $T) {", "}", inputType, () -> {
+                // The constructor can be intercepted and changed.
+                writer.write("// Start section: $L", COMMAND_CONSTRUCTOR_SECTION)
+                        .pushState(COMMAND_CONSTRUCTOR_SECTION)
+                        .write("super();")
+                        .popState()
+                        .write("// End section: $L", COMMAND_CONSTRUCTOR_SECTION);
         });
     }
 
@@ -377,6 +379,7 @@ final class CommandGenerator implements Runnable {
 
     private void writeSerde() {
         writer.write("")
+                .writeDocs("@internal")
                 .write("private serialize(")
                 .indent()
                     .write("input: $T,", inputType)
@@ -389,6 +392,7 @@ final class CommandGenerator implements Runnable {
                 );
 
         writer.write("")
+                .writeDocs("@internal")
                 .write("private deserialize(")
                 .indent()
                     .write("output: $T,", applicationProtocol.getResponseType())
